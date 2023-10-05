@@ -2,9 +2,11 @@
 title: "Joel's reverse engineering project notebook"
 output: html_notebook
 ---
-
+Loading libraries
 ```{r}
-plot(cars)
+library(tidyverse)
+library(lubridate)
+library(janitor)
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
