@@ -11,12 +11,10 @@ library(janitor)
 
 Open the data
 ```{r}
-read.csv("fatal-police-shootings-data.csv")
+read_csv("fatal-police-shootings-data.csv")
 fatal_police_shootings <- read.csv("fatal-police-shootings-data.csv")
 fatal_police_shootings %>%  
-  group_by(gender) %>% 
-  summarize(count = n()) %>%  
-  arrange(desc(count))
+  group_by(gender) 
 ```
 
 
