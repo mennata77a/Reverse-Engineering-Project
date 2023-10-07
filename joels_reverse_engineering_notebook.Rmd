@@ -2,7 +2,9 @@
 title: "Joel's reverse engineering project notebook"
 output: html_notebook
 ---
+
 Loading libraries
+
 ```{r}
 library(tidyverse)
 library(lubridate)
@@ -10,17 +12,63 @@ library(janitor)
 ```
 
 Open the data
+
 ```{r}
 read_csv("fatal-police-shootings-data.csv")
 fatal_police_shootings <- read.csv("fatal-police-shootings-data.csv")
-fatal_police_shootings %>%  
-  group_by(gender) 
+women_fatal_police_shootings <- fatal_police_shootings %>%  
+  filter(str_detect(gender, "female")) 
+
+count_women_police_shootings <- women_fatal_police_shootings %>% 
+  summarize(count = n())
+
+## cleaning the column names so I won't have trouble later on
+clean_women_fatal_police_shootings <- women_fatal_police_shootings %>% 
+  clean_names()
 ```
 
+Now, **clean_women_fatal_police_shootings** represents **women_fatal_police_shootings** but cleaned to remove spaces and the like so we can actually work with column names if necessary
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+Next, we want to clean the "date" column to actually work like a date column with lubridate. To not mess things up with the original data, we're going to create a new variable that represents the above data but only only until 2020, when the Washington Post article was published.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+```{r}
+clean_2020_women_fatal_police_shootings <- clean_women_fatal_police_shootings
+```
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+Then, we're going to actually transform the column into something useful with lubridate.
 
+```{r}
+clean_2020_women_fatal_police_shootings <- clean_2020_women_fatal_police_shootings %>% 
+  mutate(date=mdy(date))
+```
+
+Now, we're finally going to actually transform it into before the publish date.
+
+```{r}
+clean_2020_women_fatal_police_shootings <- clean_2020_women_fatal_police_shootings %>% 
+  filter(date<"2020-09-04") %>% 
+  summarize(count = n())
+
+clean_2020_women_fatal_police_shootings
+  
+```
+
+We're getting 248 - one more than when the article was published. So we're going to try to look at the dataset as it was when the Post published its article.
+
+```{r}
+OLD_fatal_police_shootings <- read_csv("2020_sept_3_fatal-police_shootings_data.csv")
+OLD_women_fatal_police_shootings <- OLD_fatal_police_shootings %>%  
+  filter(str_detect(gender, "female")) 
+
+## cleaning the column names so I won't have trouble later on
+OLD_clean_count_women_fatal_police_shootings <- OLD_count_women_fatal_police_shootings %>% 
+  clean_names()
+
+class(OLD_fatal_police_shootings$date)
+
+OLD_clean_count_women_fatal_police_shootings <- OLD_clean_count_women_fatal_police_shootings %>% 
+  filter(date<"2020-09-04") %>% 
+  summarize(count = n())
+
+OLD_clean_count_women_fatal_police_shootings
+```
