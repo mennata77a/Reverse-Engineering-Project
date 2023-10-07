@@ -7,3 +7,29 @@ output: html_notebook
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+```
+```{r}
+police_shootings <- read_csv("fatal-police-shootings-data.csv")
+
+police_shootings
+```
+
+```{r}
+police_shootings |>
+  group_by(gender) |>
+  summarise(
+    count=n())
+
+  
+  
+```
+
+```{r}
+
+```
+
+
