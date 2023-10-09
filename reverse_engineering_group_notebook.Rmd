@@ -37,43 +37,21 @@ In this section, describe the source of the data, write a basic data dictionary 
 
 ```{r}
 # Load required data
+setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
+
+fatal_police_shootings <- read_csv("fatal-police-shootings-data.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
-setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
-
-read_csv("fatal-police-shootings-data.csv")
-fatal_police_shootings <- read.csv("fatal-police-shootings-data.csv")
-women_fatal_police_shootings <- fatal_police_shootings %>%  
-  filter(str_detect(gender, "female")) 
-
-count_women_police_shootings <- women_fatal_police_shootings %>% 
-  summarize(count = n())
-
-## cleaning the column names so I won't have trouble later on
-clean_women_fatal_police_shootings <- women_fatal_police_shootings %>% 
+clean_fatal_police_shootings <- fatal_police_shootings |> 
   clean_names()
 
+women_fatal_police_shootings <- clean_fatal_police_shootings |>  
+  filter(gender == "female") 
+
+women_fatal_police_shootings <- women_fatal_police_shootings |> mutate(date=mdy(date))
 ```
-
-Now, **clean_women_fatal_police_shootings** represents **women_fatal_police_shootings** but cleaned to remove spaces and the like so we can actually work with column names if necessary
-
-Next, we want to clean the "date" column to actually work like a date column with lubridate. To not mess things up with the original data, we're going to create a new variable that represents the above data but only only until 2020, when the Washington Post article was published.
-
-```{r}
-clean_2020_women_fatal_police_shootings <- clean_women_fatal_police_shootings
-
-clean_2020_women_fatal_police_shootings
-```
-
-Then, we're going to actually transform the column into something useful with lubridate.
-
-```{r}
-clean_2020_women_fatal_police_shootings <- clean_2020_women_fatal_police_shootings |> mutate(date=mdy(date))
-```
-
-Now, we're finally going to actually transform it into before the publish date.
 
 ## Sentences to Engineer
 In this notebook, we are reverse engineering five sentences from the story.
@@ -85,11 +63,9 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ```{r}
 # Put code to reverse engineer sentence here
-clean_2020_women_fatal_police_shootings <- clean_2020_women_fatal_police_shootings %>% 
-  filter(date<"2020-09-04") %>% 
+women_fatal_police_shootings |>
+  filter(date<"2020-09-04") |> 
   summarize(count = n())
-
-clean_2020_women_fatal_police_shootings
 
 # Display results of code below this codeblock
 
@@ -97,7 +73,7 @@ clean_2020_women_fatal_police_shootings
 
 ### Sentence 2
 
-* **Sentence text**: [Paste in sentence to engineer here]
+* **Sentence text**: Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
 
 ```{r}
