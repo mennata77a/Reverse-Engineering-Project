@@ -36,9 +36,10 @@ library(dplyr)
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
 ```{r}
-# Load required data
+# This code sets the working directory to my local one (Taylor) - it will mess up your code, so erase this section and make sure yours is set to the correct working directory
 setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
 
+# Load required data
 fatal_police_shootings <- read_csv("fatal-police-shootings-data.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
@@ -63,8 +64,10 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ```{r}
 # Put code to reverse engineer sentence here
-women_fatal_police_shootings |>
-  filter(date<"2020-09-04") |> 
+women_fatal_police_shootings_2020 <- women_fatal_police_shootings |>
+  filter(date<"2020-09-04")
+
+women_fatal_police_shootings_2020 |> 
   summarize(count = n())
 
 # Display results of code below this codeblock
