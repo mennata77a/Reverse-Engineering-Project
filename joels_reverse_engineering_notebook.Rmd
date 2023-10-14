@@ -14,61 +14,226 @@ library(janitor)
 Open the data
 
 ```{r}
-read_csv("fatal-police-shootings-data.csv")
-fatal_police_shootings <- read.csv("fatal-police-shootings-data.csv")
-women_fatal_police_shootings <- fatal_police_shootings %>%  
-  filter(str_detect(gender, "female")) 
+setwd("~/Google Drive/My Drive/JOUR472/data_journalism_2023_fall/reverse engineering/Reverse-Engineering-Project")
+```
 
-count_women_police_shootings <- women_fatal_police_shootings %>% 
+Or, if R is being stupid, you can just load the Rdata file
+
+```{r}
+## load(".RData")
+```
+
+```{r}
+## View(women_fatal_police_shootings)
+## View(clean_2020_women_fatal_police_shootings)
+## View(clean_2020_women_fatal_police_shootings)
+## View(clean_women_fatal_police_shootings)
+```
+
+```{r}
+killed_by_police <- read_csv("~/Google Drive/My Drive/JOUR472/data_journalism_2023_fall/reverse engineering/Reverse-Engineering-Project/data/fatal-police-shootings-data.csv")
+
+## For the sake of simplicity, we're going to call the data we want to work with all_women_shot_in_2020 
+all_women_killed_in_2020 <- killed_by_police |> 
+  clean_names() |> ## making sure we don't have unusable column names
+  mutate(date=mdy(date)) |> ## lubridating column so it's usable
+  filter(str_detect(gender, "female")) |>  ## making the dataframe contain only women
+  filter(date<"2020-09-04") ## filtering for everything pre-publication date
+```
+
+And we're going to save the number of these women out to a variable called all_count_women_shot_in_2020
+
+```{r}
+count_all_women_killed_in_2020 <- all_women_killed_in_2020|>
+  filter(date<"2020-09-04") |> 
   summarize(count = n())
-
-## cleaning the column names so I won't have trouble later on
-clean_women_fatal_police_shootings <- women_fatal_police_shootings %>% 
-  clean_names()
 ```
 
-Now, **clean_women_fatal_police_shootings** represents **women_fatal_police_shootings** but cleaned to remove spaces and the like so we can actually work with column names if necessary
-
-Next, we want to clean the "date" column to actually work like a date column with lubridate. To not mess things up with the original data, we're going to create a new variable that represents the above data but only only until 2020, when the Washington Post article was published.
+If you used the .Rdata file from above, there are about half a million variables right now. Let's get rid of the unnecessary ones.
 
 ```{r}
-clean_2020_women_fatal_police_shootings <- clean_women_fatal_police_shootings
-```
-
-Then, we're going to actually transform the column into something useful with lubridate.
-
-```{r}
-clean_2020_women_fatal_police_shootings <- clean_2020_women_fatal_police_shootings %>% 
-  mutate(date=mdy(date))
-```
-
-Now, we're finally going to actually transform it into before the publish date.
-
-```{r}
-clean_2020_women_fatal_police_shootings <- clean_2020_women_fatal_police_shootings %>% 
-  filter(date<"2020-09-04") %>% 
-  summarize(count = n())
-
-clean_2020_women_fatal_police_shootings
-  
+## rm(clean_2020_women_fatal_police_shootings)
+## rm(clean_women_fatal_police_shootings)
+## rm(count_clean_2020_women_fatal_police_shootings)
 ```
 
 We're getting 248 - one more than when the article was published. So we're going to try to look at the dataset as it was when the Post published its article.
 
 ```{r}
-OLD_fatal_police_shootings <- read_csv("2020_sept_3_fatal-police_shootings_data.csv")
-OLD_women_fatal_police_shootings <- OLD_fatal_police_shootings %>%  
-  filter(str_detect(gender, "female")) 
+## load data
+OLD_data_people_killed <- read_csv("data/2020_sept_3_fatal-police_shootings_data.csv")
 
-## cleaning the column names so I won't have trouble later on
-OLD_clean_count_women_fatal_police_shootings <- OLD_count_women_fatal_police_shootings %>% 
-  clean_names()
+## let's lubridate and clean
+OLD_data_people_killed <- OLD_data_people_killed |> 
+  mutate(date=ymd(date)) |> ## V2 is in ymd format
+  clean_names() |> 
+  filter(date<"2020-09-04") ## we technically shouldn't need to do this but sicher ist sicher
 
-class(OLD_fatal_police_shootings$date)
+OLD_data_women_killed <- OLD_data_people_killed  |>   
+  filter(str_detect(gender, "(?i)F")) |> 
+  filter(date<"2020-09-04") ## again we shouldn't have to do this but as my dad says, viel hilft viel
 
-OLD_clean_count_women_fatal_police_shootings <- OLD_clean_count_women_fatal_police_shootings %>% 
-  filter(date<"2020-09-04") %>% 
+## for some reason the below function isn't working god knows why so don't use it
+## OLD_fatal_police_shootings <- read_csv("2020_sept_3_fatal-police_shootings_data.csv")
+## HELP?? seeing what the hell format R thinks it is
+## class(OLD_fatal_police_shootings$date)
+## HELP?? if it's not working, see if indeed R was smart enough to load lubridate
+## search()
+## HELP?? if lubridate is in the list, then we're golden. if not, load the library again.
+## HELP?? if the column returns the result "date," we are GOOD. if not, let's lubridate the column since it's apparently a character column
+
+```
+
+```{r}
+OLD_data_count_women_killed <- OLD_data_women_killed |>  
   summarize(count = n())
 
-OLD_clean_count_women_fatal_police_shootings
+OLD_data_count_women_killed 
 ```
+
+**We figured it out!! Sometime down the line after publication, another entry was added which is why we got 248 and they had 247.**
+
+Q2: Sentence text: Crenshaw said Black women\'s deaths also may be dismissed as \"collateral damage\" if they are killed while police are pursuing someone else. Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
+
+**Analysis summary**: We weren't able to figure out where the Post got its numbers from. For one, the terms they used were quite vague (i.e. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. Nothing brought us to either of the magical numbers, 12 or 20. Below is our data analysis.
+
+They're talking about Black women but mention 247 women - that's women of all races shot and killed by police. I can confirm that number. So let's assume they mean women of all races - even though the sentence implies Black women.
+
+```{r}
+count_women_killed_in_2020 <- all_women_killed_in_2020 |> 
+  group_by(threat_type) |> 
+  summarize(count = n())
+
+count_black_women_killed_in_2020 <- all_women_killed_in_2020 |> 
+  filter(str_detect(race, "(?i)B")) |> 
+  group_by(threat_type) |> 
+  summarize(count = n())
+```
+
+We're getting 21 accidents for women of all races, which is more than their 20. For Black women, there 6 accidents, 1 woman shot while fleeing, and 3 undetermined. That's still not what they have - 20. Assuming this is not the above problem with updated data, let's see if the problem is them looking at different columns than us.
+
+```{r}
+count_black_women_police_killings <- all_women_killed_in_2020 |> 
+  filter(str_detect(race, "(?i)B")) |> 
+  group_by(armed_with) |> 
+  summarize(count = n())
+
+count_black_women_police_killings
+## At this stage I know it seems silly to create a new dataframe for this but it'll be important in a sec.
+```
+
+There were 8 shootings of unarmed Black women and 2 shootings where it's unknown whether/with what the women were armed. Before we move on, let's quickly fix that unknown and undetermined as separate results. Thank god for Chat GPT, it figured out this code for me.
+
+```{r}
+library(dplyr) ## it should work without this but if it ain't broke don't fix it, as they say.
+
+count_black_women_police_killings <- count_black_women_police_killings  |> 
+  mutate(
+    armed_with = ifelse(armed_with %in% c("undetermined", "unknown"), "undetermined_unknown", armed_with)
+  ) %>%
+  group_by(armed_with) %>%
+  summarize(count = sum(count, na.rm = TRUE))
+
+count_black_women_police_killings
+```
+
+In any case, 8 or 10 are both less than 20. Even if we included NA, we'd have 11 - still less than 20. Let's try this for all women (and while we're at it clean the data so that undetermined and unknown aren't two separate columns).
+
+```{r}
+count_all_women_killed_in_2020 <- all_women_killed_in_2020 |> 
+  group_by(armed_with) |> 
+  summarize(count = n())
+
+count_all_women_killed_in_2020  <- count_all_women_killed_in_2020 %>%
+  mutate(
+    armed_with = ifelse(armed_with %in% c("undetermined", "unknown"), "undetermined_unknown", armed_with)
+  ) %>%
+  group_by(armed_with) %>%
+  summarize(count = sum(count, na.rm = TRUE))
+
+count_all_women_killed_in_2020
+```
+
+Here, 37 women were unarmed, 13 undetermined/unknown. So we're still getting that magical 10 number. Let's see if it's the problem with our data being newer.
+
+```{r}
+OLD_data_people_killed <- read_csv("data/2020_sept_3_fatal-police_shootings_data.csv")
+
+OLD_data_women_killed <- OLD_data_people_killed |> 
+  filter(str_detect(gender, "(?i)F"))
+
+## creating a subset for just Black women
+OLD_data_black_women_killed <- OLD_data_women_killed |> 
+  filter(str_detect(race, "(?i)B"))
+```
+
+But wait...our threat_type column is gone with this spreadsheet so it looks like new columns were introduced between V1 and V2. Ugh. Let's use threat_level instead.
+
+```{r}
+OLD_data_black_women_killed |> 
+  group_by(threat_level) |> 
+  summarize(count = n())
+```
+
+Ok, now we're getting 23 women who were attacking, 23 "other" (whatever that means), and 2 "undetermined" - so not what we want. The other column that would make sense to try to recreate their data is the flee column.
+
+```{r}
+OLD_data_black_women_killed |> 
+  group_by(flee) |> 
+  summarize(count = n())
+```
+
+Not helpful either - we now know that 34 Black women killed weren't fleeing. That still doesn't give us the magical 20 number. In fact, we're farther away from it than we were using V2 data - even though the Post was using V1 data at the time of publication presumably. So we don't know where the hell they got the 20 number from. Let's tackle the other number, 12. Here's the sentence again: In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
+
+Let's forget V2 data for now and work with what the Post was working with at the time, V1 data. It's not immediately clear to me what column they're basing that off of, so let's start with the flee data again, starting with all women. We already ran this code above so we can run it again down here so we have it on hand.
+
+```{r}
+OLD_data_women_killed |> 
+  group_by(flee) |> 
+  summarize(count=n())
+```
+
+Welp, 172 women weren't fleeing. Way more than 12. Let's try for Black women specifically.
+
+```{r}
+OLD_data_black_women_killed |> 
+  group_by(flee) |> 
+  summarize(count=n())
+```
+
+34 weren't fleeing. Not helpful either. Let's try a different column.
+
+```{r}
+OLD_data_women_killed |> 
+  group_by(armed) |> 
+  summarize(count=n())
+```
+
+26 women were unarmed. Not anywhere close to 12. Let's try Black women.
+
+```{r}
+OLD_data_black_women_killed |> 
+  group_by(armed) |> 
+  summarize(count=n())
+```
+
+Annnd we get than 7 Black women were unarmed. Let's try V2 data after all.
+
+```{r}
+all_women_killed_in_2020 |> 
+  group_by(threat_type) |> 
+  summarize(count=n())
+  
+```
+
+Ok so there were 16 accidents. Again, not 12 nor 20. That's for all women, though, so for the sake of argument let's try just Black women.
+
+```{r}
+all_black_women_killed_in_2020 <- all_women_killed_in_2020 |> 
+  filter(str_detect(race, "(?i)B"))
+all_black_women_killed_in_2020 |> 
+  group_by(threat_type) |> 
+  summarize(count=n())
+```
+
+So 5 Black women were killed on accident, 1 undetermined. Not helpful. So I have no idea where the hell the Post got their numbers from.
