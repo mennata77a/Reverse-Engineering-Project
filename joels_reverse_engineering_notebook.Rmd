@@ -33,7 +33,7 @@ Or, if R is being stupid, you can just load the Rdata file
 ```{r}
 killed_by_police <- read_csv("~/Google Drive/My Drive/JOUR472/data_journalism_2023_fall/reverse engineering/Reverse-Engineering-Project/data/fatal-police-shootings-data.csv")
 
-## For the sake of simplicity, we're going to call the data we want to work with all_women_shot_in_2020 
+## For the sake of simplicity, we're going to call the data we want to work with all_women_killed_in_2020 
 all_women_killed_in_2020 <- killed_by_police |> 
   clean_names() |> ## making sure we don't have unusable column names
   mutate(date=mdy(date)) |> ## lubridating column so it's usable
@@ -104,37 +104,41 @@ count_women_killed_in_2020 <- all_women_killed_in_2020 |>
   group_by(threat_type) |> 
   summarize(count = n())
 
+count_women_killed_in_2020
+
 count_black_women_killed_in_2020 <- all_women_killed_in_2020 |> 
   filter(str_detect(race, "(?i)B")) |> 
   group_by(threat_type) |> 
   summarize(count = n())
+
+count_black_women_killed_in_2020
 ```
 
-We're getting 21 accidents for women of all races, which is more than their 20. For Black women, there 6 accidents, 1 woman shot while fleeing, and 3 undetermined. That's still not what they have - 20. Assuming this is not the above problem with updated data, let's see if the problem is them looking at different columns than us.
+We're getting 16 accidents for women of all races, which is less than their 20. For Black women, there 5 accidents, 1 woman shot while fleeing, and 1 undetermined. That's still not what they have - 20. Assuming this is not the above problem with updated data, let's see if the problem is them looking at different columns than us.
 
 ```{r}
-count_black_women_police_killings <- all_women_killed_in_2020 |> 
+count_armed_with_black_women_police_killings <- all_women_killed_in_2020 |> 
   filter(str_detect(race, "(?i)B")) |> 
   group_by(armed_with) |> 
   summarize(count = n())
 
-count_black_women_police_killings
+count_armed_with_black_women_police_killings
 ## At this stage I know it seems silly to create a new dataframe for this but it'll be important in a sec.
 ```
 
-There were 8 shootings of unarmed Black women and 2 shootings where it's unknown whether/with what the women were armed. Before we move on, let's quickly fix that unknown and undetermined as separate results. Thank god for Chat GPT, it figured out this code for me.
+There were 7 shootings of unarmed Black women and 2 shootings where it's unknown whether/with what the women were armed. Before we move on, let's quickly fix that unknown and undetermined as separate results. Thank god for Chat GPT, it figured out this code for me.
 
 ```{r}
 library(dplyr) ## it should work without this but if it ain't broke don't fix it, as they say.
 
-count_black_women_police_killings <- count_black_women_police_killings  |> 
+count_armed_with_black_women_police_killings <- count_armed_with_black_women_police_killings  |> 
   mutate(
     armed_with = ifelse(armed_with %in% c("undetermined", "unknown"), "undetermined_unknown", armed_with)
   ) %>%
   group_by(armed_with) %>%
   summarize(count = sum(count, na.rm = TRUE))
 
-count_black_women_police_killings
+count_armed_with_black_women_police_killings
 ```
 
 In any case, 8 or 10 are both less than 20. Even if we included NA, we'd have 11 - still less than 20. Let's try this for all women (and while we're at it clean the data so that undetermined and unknown aren't two separate columns).
@@ -154,7 +158,7 @@ count_all_women_killed_in_2020  <- count_all_women_killed_in_2020 %>%
 count_all_women_killed_in_2020
 ```
 
-Here, 37 women were unarmed, 13 undetermined/unknown. So we're still getting that magical 10 number. Let's see if it's the problem with our data being newer.
+Here, 26 women were unarmed, 3 undetermined/unknown. So we're still not getting that magical 10 number. Let's see if it's the problem with our data being newer.
 
 ```{r}
 OLD_data_people_killed <- read_csv("data/2020_sept_3_fatal-police_shootings_data.csv")
