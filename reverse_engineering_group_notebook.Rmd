@@ -81,6 +81,7 @@ women_fatal_police_shootings_2020 |>
 
 ```{r}
 # Put code to reverse engineer sentence here
+women_fa
 
 # Display results of code below this codeblock
 
