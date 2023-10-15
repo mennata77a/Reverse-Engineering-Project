@@ -51,7 +51,11 @@ clean_fatal_police_shootings <- fatal_police_shootings |>
 women_fatal_police_shootings <- clean_fatal_police_shootings |>  
   filter(gender == "female") 
 
+clean_fatal_police_shootings <- clean_fatal_police_shootings |> mutate(date=mdy(date))
 women_fatal_police_shootings <- women_fatal_police_shootings |> mutate(date=mdy(date))
+
+clean_fatal_police_shootings_2020 <- clean_fatal_police_shootings |>  
+  filter(date<"2020-09-04")
 ```
 
 ## Sentences to Engineer
@@ -74,23 +78,62 @@ women_fatal_police_shootings_2020 |>
 
 ```
 
+We're getting 1 more person than the Post did. Let's look at their original dataset to see if that makes a difference.
+
+```{r}
+setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
+
+data_to_sept_2020_shootings <- read_csv("2020_sept_3_fatal-police_shootings_data.csv")
+
+# Clean required data and prepare for analysis if needed. 
+
+data_to_sept_2020_shootings <- data_to_sept_2020_shootings |> 
+  clean_names()
+
+women_fatal_police_shootings_sept_2020 <- data_to_sept_2020_shootings |>  
+  filter(gender == "F") 
+
+women_fatal_police_shootings_sept_2020 <- women_fatal_police_shootings_sept_2020 |>
+  filter(date<"2020-09-04")
+
+women_fatal_police_shootings_sept_2020 |> 
+  summarize(count = n())
+
+```
+
+It worked!
+
 ### Sentence 2
 
 * **Sentence text**: Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Analysis summary**: We weren't able to figure out where the Post got its numbers from. For one, the terms they used were quite vague (i.e. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. Nothing brought us to either of the magical numbers, 12 or 20. Below is our data analysis.
+
+They're talking about Black women but mention 247 women - that's women of all races shot and killed by police. I can confirm that number. So let's assume they mean women of all races - even though the sentence implies Black women.
 
 ```{r}
 # Put code to reverse engineer sentence here
-women_fa
 
+#trying with v1 data to look at threat_level and see if we can get at women who were not the culprit
+
+women_fatal_police_shootings_sept_2020 |> group_by(threat_level) |>
+  summarise(count = n())
 # Display results of code below this codeblock
 
 ```
 
+#none of these get close to what we're looking for (20 or 12). Let's try the v2 dataset:
+
+```{r}
+women_fatal_police_shootings_2020 |> group_by(threat_type) |>
+  summarise(count = n())
+```
+
+#Ok not sure what I did differently here but now suddenly accident and flee add to 20. Maybe those are our 20 women? Don't feel super confident about this but not sure where else they would have gotten that number. 
+
 ### Sentence 3
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: At least 89 of the women [fatally shot by police] were at their homes or residences where they sometimes stayed.
+* **Analysis summary**: I don't think this was determined through the dataset we have. There's no indicator of this info listed.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -101,16 +144,18 @@ women_fa
 
 ### Sentence 4
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: About 31 percent, or 77, of the 247 women fatally shot by police since 2015 had mental health issues, compared to 22 percent of the 5,362 men killed.
+* **Analysis summary**: We were able to confirm the findings using the original dataset Joel and Shaun found that reflects what info they had when the article came out. This confirms we should use this dataset going forward.
 
 ```{r}
 # Put code to reverse engineer sentence here
-
+data_to_sept_2020_shootings |> 
+  group_by(gender, signs_of_mental_illness) |>
+  summarise(count = n())
 # Display results of code below this codeblock
-
 ```
 
+This is looking more accurate. 77 out of 247 women and 22% of men had signs of mental illness.
 ### Sentence 5
 
 * **Sentence text**: [Paste in sentence to engineer here]

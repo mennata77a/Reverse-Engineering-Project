@@ -40,7 +40,8 @@ In this section, describe the source of the data, write a basic data dictionary 
 setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
 
 # Load required data
-fatal_police_shootings <- read_csv("fatal-police-shootings-data.csv")
+fatal_police_shootings <- read_csv("fatal-police-shootings-data_v1.csv")
+data_to_sept_2020_shootings <- read_csv("2020_sept_3_fatal-police_shootings_data.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
@@ -48,10 +49,12 @@ fatal_police_shootings <- read_csv("fatal-police-shootings-data.csv")
 clean_fatal_police_shootings <- fatal_police_shootings |> 
   clean_names()
 
-women_fatal_police_shootings <- clean_fatal_police_shootings |>  
-  filter(gender == "female") 
+data_to_sept_2020_shootings <- data_to_sept_2020_shootings |> 
+  clean_names()
 
-women_fatal_police_shootings <- women_fatal_police_shootings |> mutate(date=mdy(date))
+women_fatal_police_shootings_sept_2020 <- data_to_sept_2020_shootings |>  
+  filter(gender == "F") 
+
 ```
 
 ## Sentences to Engineer
@@ -64,34 +67,52 @@ In this notebook, we are reverse engineering five sentences from the story.
 
 ```{r}
 # Put code to reverse engineer sentence here
-women_fatal_police_shootings_2020 <- women_fatal_police_shootings |>
+women_fatal_police_shootings_sept_2020 <- women_fatal_police_shootings_sept_2020 |>
   filter(date<"2020-09-04")
 
-women_fatal_police_shootings_2020 |> 
+women_fatal_police_shootings_sept_2020 |> 
   summarize(count = n())
 
 # Display results of code below this codeblock
 
 ```
 
+```{r}
+
+fatal_police_shootings_2020 <- fatal_police_shootings_2020 |>
+    filter(date<"2020-09-04")
+
+fatal_police_shootings_2020 |> group_by(gender) |>
+  summarise(count = n())
+
+```
+
 ### Sentence 2
 
-* **Sentence text**: Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
+* **Sentence text**: Crenshaw said Black women’s deaths also may be dismissed as “collateral damage” if they are killed while police are pursuing someone else. Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
 
 ```{r}
 # Put code to reverse engineer sentence here
-women_fatal_police_shootings_2020 |> filter(threat_type == "accident")
+women_fatal_police_shootings_2020 |> 
+  group_by(threat_level, flee) |>
+  summarise(count = n())
 
-# we're missing 4 people here, not sure why
+# using the V1 data, we aren't seeing any of the numbers we're looking for (20 and 12). The wording is kind of vague, maybe they are only talking about Black women. Let's try to filter for race.
 
-# Display results of code below this codeblock
+```
+```{r}
+women_fatal_police_shootings_2020 |> 
+  filter(race == "B")|>
+   group_by(threat_level, flee) |>
+  summarise(count = n())
 
+#we still aren't seeing the same numbers. Maybe we need to look at v2 data?
 ```
 
 ### Sentence 3
 
-* **Sentence text**: [Paste in sentence to engineer here]
+* **Sentence text**: At least 89 of the women [fatally shot by police] were at their homes or residences where they sometimes stayed.
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
 
 ```{r}
@@ -103,11 +124,15 @@ women_fatal_police_shootings_2020 |> filter(threat_type == "accident")
 
 ### Sentence 4
 
-* **Sentence text**: [Paste in sentence to engineer here]
+* **Sentence text**: About 31 percent, or 77, of the 247 women fatally shot by police since 2015 had mental health issues, compared to 22 percent of the 5,362 men killed.
 * **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
 
 ```{r}
 # Put code to reverse engineer sentence here
+fatal_police_shootings_2020 |>
+  group_by(gender, was_mental_illness_related) |>
+  summarise(count = n()) |>
+  arrange(desc(count))
 
 # Display results of code below this codeblock
 
