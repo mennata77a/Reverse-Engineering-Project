@@ -1812,26 +1812,16 @@ The following objects are masked from ‘package:stats’:
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxua2lsbGVkX2J5X3BvbGljZSA8LSByZWFkX2NzdihcIn4vR29vZ2xlIERyaXZlL015IERyaXZlL0pPVVI0NzIvZGF0YV9qb3VybmFsaXNtXzIwMjNfZmFsbC9yZXZlcnNlIGVuZ2luZWVyaW5nL1JldmVyc2UtRW5naW5lZXJpbmctUHJvamVjdC9kYXRhL2ZhdGFsLXBvbGljZS1zaG9vdGluZ3MtZGF0YS5jc3ZcIilcbmBgYCJ9 -->
-<pre class="r"><code>killed_by_police &lt;- read_csv(&quot;~/Google Drive/My Drive/JOUR472/data_journalism_2023_fall/reverse engineering/Reverse-Engineering-Project/data/fatal-police-shootings-data.csv&quot;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiUm93czogODc2OCBDb2x1bW5zOiAxOeKUgOKUgCBDb2x1bW4gc3BlY2lmaWNhdGlvbiDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIBcbkRlbGltaXRlcjogXCIsXCJcbmNociAoMTMpOiBkYXRlLCB0aHJlYXRfdHlwZSwgZmxlZV9zdGF0dXMsIGFybWVkX3dpdGgsIGNpdHksIGNvdW50eSwgc3RhdGUsIGxvY2F0aW9uX3ByZWNpcy4uLlxuZGJsICAoNCk6IGlkLCBsYXRpdHVkZSwgbG9uZ2l0dWRlLCBhZ2VcbmxnbCAgKDIpOiB3YXNfbWVudGFsX2lsbG5lc3NfcmVsYXRlZCwgYm9keV9jYW1lcmFcbuKEuSBVc2UgYHNwZWMoKWAgdG8gcmV0cmlldmUgdGhlIGZ1bGwgY29sdW1uIHNwZWNpZmljYXRpb24gZm9yIHRoaXMgZGF0YS5cbuKEuSBTcGVjaWZ5IHRoZSBjb2x1bW4gdHlwZXMgb3Igc2V0IGBzaG93X2NvbF90eXBlcyA9IEZBTFNFYCB0byBxdWlldCB0aGlzIG1lc3NhZ2UuXG4ifQ== -->
-<pre><code>Rows: 8768 Columns: 19── Column specification ──────────────────────────────────────────────────────────────────────
-Delimiter: &quot;,&quot;
-chr (13): date, threat_type, flee_status, armed_with, city, county, state, location_precis...
-dbl  (4): id, latitude, longitude, age
-lgl  (2): was_mental_illness_related, body_camera
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgRm9yIHRoZSBzYWtlIG9mIHNpbXBsaWNpdHksIHdlJ3JlIGdvaW5nIHRvIGNhbGwgdGhlIGRhdGEgd2Ugd2FudCB0byB3b3JrIHdpdGggYWxsX3dvbWVuX3Nob3RfaW5fMjAyMCBcbmFsbF93b21lbl9raWxsZWRfaW5fMjAyMCA8LSBraWxsZWRfYnlfcG9saWNlIHw+IFxuICBjbGVhbl9uYW1lcygpIHw+ICMjIG1ha2luZyBzdXJlIHdlIGRvbid0IGhhdmUgdW51c2FibGUgY29sdW1uIG5hbWVzXG4gIG11dGF0ZShkYXRlPW1keShkYXRlKSkgfD4gIyMgbHVicmlkYXRpbmcgY29sdW1uIHNvIGl0J3MgdXNhYmxlXG4gIGZpbHRlcihzdHJfZGV0ZWN0KGdlbmRlciwgXCJmZW1hbGVcIikpIHw+ICAjIyBtYWtpbmcgdGhlIGRhdGFmcmFtZSBjb250YWluIG9ubHkgd29tZW5cbiAgZmlsdGVyKGRhdGU8XCIyMDIwLTA5LTA0XCIpICMjIGZpbHRlcmluZyBmb3IgZXZlcnl0aGluZyBwcmUtcHVibGljYXRpb24gZGF0ZVxuYGBgIn0= -->
-<pre class="r"><code>## For the sake of simplicity, we&#39;re going to call the data we want to work with all_women_shot_in_2020 
-all_women_killed_in_2020 &lt;- killed_by_police |&gt; 
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWxsX3dvbWVuX2tpbGxlZF9pbl8yMDIwIDwtIGtpbGxlZF9ieV9wb2xpY2UgfD4gXG4gIGNsZWFuX25hbWVzKCkgfD4gIyMgbWFraW5nIHN1cmUgd2UgZG9uJ3QgaGF2ZSB1bnVzYWJsZSBjb2x1bW4gbmFtZXNcbiAgbXV0YXRlKGRhdGU9bWR5KGRhdGUpKSB8PiAjIyBsdWJyaWRhdGluZyBjb2x1bW4gc28gaXQncyB1c2FibGVcbiAgZmlsdGVyKHN0cl9kZXRlY3QoZ2VuZGVyLCBcImZlbWFsZVwiKSlcblxuYGBgIn0= -->
+<pre class="r"><code>all_women_killed_in_2020 &lt;- killed_by_police |&gt; 
   clean_names() |&gt; ## making sure we don&#39;t have unusable column names
   mutate(date=mdy(date)) |&gt; ## lubridating column so it&#39;s usable
-  filter(str_detect(gender, &quot;female&quot;)) |&gt;  ## making the dataframe contain only women
-  filter(date&lt;&quot;2020-09-04&quot;) ## filtering for everything pre-publication date</code></pre>
+  filter(str_detect(gender, &quot;female&quot;))
+</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3I6IG9iamVjdCAna2lsbGVkX2J5X3BvbGljZScgbm90IGZvdW5kXG4ifQ== -->
+<pre><code>Error: object &#39;killed_by_police&#39; not found</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>And we’re going to save the number of these women out to a variable
