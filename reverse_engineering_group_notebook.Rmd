@@ -35,12 +35,12 @@ library(dplyr)
 
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
-```{r}
+```{r echo=FALSE, message=FALSE}
 # This code sets the working directory to my local one (Taylor) - it will mess up your code, so erase this section and make sure yours is set to the correct working directory
 setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
 
 # Load required data
-fatal_police_shootings <- read_csv("fatal-police-shootings-data.csv")
+fatal_police_shootings <- read_csv("data/fatal-police-shootings-data.csv")
 
 # Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
@@ -83,7 +83,7 @@ We're getting 1 more person than the Post did. Let's look at their original data
 ```{r}
 setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
 
-data_to_sept_2020_shootings <- read_csv("2020_sept_3_fatal-police_shootings_data.csv")
+data_to_sept_2020_shootings <- read_csv("data/2020_sept_3_fatal-police_shootings_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
 
@@ -106,14 +106,14 @@ It worked!
 ### Sentence 2
 
 * **Sentence text**: Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
-* **Analysis summary**: We weren't able to figure out where the Post got its numbers from. For one, the terms they used were quite vague (i.e. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. Nothing brought us to either of the magical numbers, 12 or 20. Below is our data analysis.
+* **Analysis summary**: After a lot of struggling, we were able to figure out where the Post got its numbers from. The terms the Post used were quite vague (e.g. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. Below is our data analysis.
 
-They're talking about Black women but mention 247 women - that's women of all races shot and killed by police. I can confirm that number. So let's assume they mean women of all races - even though the sentence implies Black women.
+They're talking about Black women but mention 247 women - that's women of all races shot and killed by police. We can confirm that number. So let's assume they mean women of all races - even though the sentence implies Black women.
 
 ```{r}
 # Put code to reverse engineer sentence here
 
-#trying with v1 data to look at threat_level and see if we can get at women who were not the culprit
+# trying with v1 data to look at threat_level and see if we can get at women who were not the culprit
 
 women_fatal_police_shootings_sept_2020 |> group_by(threat_level) |>
   summarise(count = n())
@@ -121,19 +121,19 @@ women_fatal_police_shootings_sept_2020 |> group_by(threat_level) |>
 
 ```
 
-#none of these get close to what we're looking for (20 or 12). Let's try the v2 dataset:
+# So none of these get close to what we're looking for (20 or 12), nor do they mention anything about people not at fault. Let's try the v2 dataset:
 
 ```{r}
 women_fatal_police_shootings_2020 |> group_by(threat_type) |>
   summarise(count = n())
 ```
 
-#Ok not sure what I did differently here but now suddenly accident and flee add to 20. Maybe those are our 20 women? Don't feel super confident about this but not sure where else they would have gotten that number. 
+# Accident and flee add to 20. Those are probably our 20 magical women. We aren't entirely sure if this is what they did, but we don't know what else they could have done to get that number so that's what we're going to go with.
 
 ### Sentence 3
 
 * **Sentence text**: At least 89 of the women [fatally shot by police] were at their homes or residences where they sometimes stayed.
-* **Analysis summary**: I don't think this was determined through the dataset we have. There's no indicator of this info listed.
+* **Analysis summary**: We don't think this was determined through the dataset we have. There's no indicator of this info anywhere in either dataset. Presumably, the Post crawled through police reports that probably indicated whether the shooting was at the woman's house and from there got those statistics. We don't have access to those police reports, though, so we can only speculate; none of the Github data bares this out.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -145,7 +145,7 @@ women_fatal_police_shootings_2020 |> group_by(threat_type) |>
 ### Sentence 4
 
 * **Sentence text**: About 31 percent, or 77, of the 247 women fatally shot by police since 2015 had mental health issues, compared to 22 percent of the 5,362 men killed.
-* **Analysis summary**: We were able to confirm the findings using the original dataset Joel and Shaun found that reflects what info they had when the article came out. This confirms we should use this dataset going forward.
+* **Analysis summary**: We were able to confirm the findings using the original dataset Joel and Shaun found that reflects what info they had when the article came out. That means we should probably use this dataset going forward, though it's strange that we got to the 20 answer thanks to the V2 dataset. Maybe the Post was already testing V2 at the time?
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -158,11 +158,15 @@ data_to_sept_2020_shootings |>
 This is looking more accurate. 77 out of 247 women and 22% of men had signs of mental illness.
 ### Sentence 5
 
-* **Sentence text**: [Paste in sentence to engineer here]
-* **Analysis summary**: [Write up two to three sentences describing the results of your analysis.  Were you able to confirm the finding? If not, why not?]
+* **Sentence text**: Since 2015, police have killed 26 unarmed women, including Taylor.
+* **Analysis summary**: This was the easiest finding to confirm. Yes, a simple column analysis reveals that 26 unarmed women were killed up until the date of publication.
 
 ```{r}
 # Put code to reverse engineer sentence here
+## using v1 data
+women_fatal_police_shootings_sept_2020 |> 
+  group_by(armed) |> 
+  summarize(count=n())
 
 # Display results of code below this codeblock
 

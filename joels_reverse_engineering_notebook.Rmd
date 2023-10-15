@@ -241,3 +241,14 @@ all_black_women_killed_in_2020 |>
 ```
 
 So 5 Black women were killed on accident, 1 undetermined. Not helpful. So I have no idea where the hell the Post got their numbers from.
+
+EDIT: Taylor pointed out with the below code, if you combine accident and flee, you get 20. So that's where, presumably, the post got its numbers from.
+
+```{r}
+count_women_killed_in_2020 <- all_women_killed_in_2020 |> 
+  group_by(threat_type) |> 
+  summarize(count = n())
+
+count_women_killed_in_2020
+
+```
