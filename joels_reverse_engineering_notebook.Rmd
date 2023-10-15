@@ -93,7 +93,7 @@ OLD_data_count_women_killed
 
 **We figured it out!! Sometime down the line after publication, another entry was added which is why we got 248 and they had 247.**
 
-Q2: Sentence text: Crenshaw said Black women\'s deaths also may be dismissed as \"collateral damage\" if they are killed while police are pursuing someone else. Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
+Q2: Sentence text: Crenshaw said Black women's deaths also may be dismissed as "collateral damage" if they are killed while police are pursuing someone else. Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
 
 **Analysis summary**: We weren't able to figure out where the Post got its numbers from. For one, the terms they used were quite vague (i.e. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. Nothing brought us to either of the magical numbers, 12 or 20. Below is our data analysis.
 
