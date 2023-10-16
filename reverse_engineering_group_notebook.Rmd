@@ -159,7 +159,7 @@ This is looking more accurate. 77 out of 247 women and 22% of men had signs of m
 ### Sentence 5
 
 * **Sentence text**: Since 2015, police have killed 26 unarmed women, including Taylor.
-* **Analysis summary**: This was the easiest finding to confirm. Yes, a simple column analysis reveals that 26 unarmed women were killed up until the date of publication.
+* **Analysis summary**: This was the easiest finding to confirm. A simple column analysis reveals that 26 unarmed women were killed up until the date of publication.
 
 ```{r}
 # Put code to reverse engineer sentence here
