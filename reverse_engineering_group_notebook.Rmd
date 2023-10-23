@@ -35,8 +35,6 @@ library(dplyr)
 
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
-Our data comes from a database the Washington Post compiled 
-
 ```{r echo=FALSE, message=FALSE}
 # This code sets the working directory to my local one (Taylor) - it will mess up your code, so erase this section and make sure yours is set to the correct working directory
 setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
