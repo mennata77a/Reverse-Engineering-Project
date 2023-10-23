@@ -16,9 +16,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction 
+## Introduction
 
-In this notebook, we are reverse engineering the story, [Nearly 250 women have been shot by police since 2015](https://www.washingtonpost.com/graphics/2020/investigations/police-shootings-women/)
+In this notebook, we are reverse engineering this story: [Nearly 250 women have been shot by police since 2015](https://www.washingtonpost.com/graphics/2020/investigations/police-shootings-women/)
 
 ## Load libraries
 
@@ -33,12 +33,28 @@ library(dplyr)
 
 ## Load and Cleaning Data
 
-In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
+In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data.
+
+Our data comes from a Washington Post database that tracks police shootings of citizens. It's unclear where exactly the Post gets its data from - presumably, skimming press releases from police departments. The biggest obstacle to us was the development of a new database version, V2. We were unable to verify some of the Post's numbers until we switched from V2 data (which is much more specific) to V1 data. For one question, though, we had to switch *back* to the V2 database. We've outlined why we chose the respective databases for each question.
+
+Here's the variables we're working with:
+
+`fatal_police_shootings` is the dataframe showing all police shootings. We obtained this in CSV form from the Post's Github repository and converted it to an R dataframe so we can work with it more easily. **We'll refer to data based off this dataframe as V2 data.**
+
+`clean_fatal_police_shootings` (V2) is the same database but cleaned with the janitor library so we can easily use it in R. It, for example, removes spaces and replaces them with underscores since R can't process spaces. After cleaning it with the janitor library, we used the lubridate library to change the date's column format from character to date so we can exclude data before or after a certain date. That's important for retracing the Post's steps as we confirm its findings. The column is unusable if not lubridated as the character format does not allow any date filtering.
+
+`women_fatal_police_shootings` (V2) is the above cleaned database filtered to include only women, the gender the Post analyzed. It is lubridated as well for the reason above.
+
+`women_fatal_police_shootings_2020` (V2) is the above data filtered to exclude any shootings after the Post published its article on Sept. 4, 2020.
+
+`data_to_sept_2020_shootings` comes from an old commit in the Post's repository, version one. This is the dataset the Post's data journalists used when reporting the story cleaned using the above process using the janitor library.
+
+The `fatal_police_shootings` variable is V2 data. Unlike V1 data, V2 data includes more details about shootings, including whether the shooting was accidental. The Post released the revamped dataset on Nov. 3, 2022 - a little more than two years after the article's publication - so we primarily used the above V1 data to retrace the Post's steps, assuming the journalists did not use the newer version (much) for the original story.
+
+`data_to_sept_2020_women_shootings` is the V1 data above filtered to include only women, the article's focus.
 
 ```{r echo=FALSE, message=FALSE}
-# This code sets the working directory to my local one (Taylor) - it will mess up your code, so erase this section and make sure yours is set to the correct working directory
-setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
-
+# Set your working directory to wherever you have downloaded the data in this notebook.
 # Load required data
 fatal_police_shootings <- read_csv("data/fatal-police-shootings-data.csv")
 
@@ -59,12 +75,13 @@ clean_fatal_police_shootings_2020 <- clean_fatal_police_shootings |>
 ```
 
 ## Sentences to Engineer
+
 In this notebook, we are reverse engineering five sentences from the story.
 
 ### Sentence 1
 
-* **Sentence text**: "Since The Washington Post began tracking fatal shootings by police in 2015, officers have fatally shot 247 women out of the more than 5,600 people killed overall."
-* **Analysis summary**: We were able to get pretty close to the numbers quoted in the article. We came up with 248, one more than the Post included in their article. We aren't sure where the extra person is coming from, but we weren't able to locate them. The data doesn't include timing, so maybe the article came out before one from the same day got logged? That seems like a stretch though.
+-   **Sentence text**: "Since The Washington Post began tracking fatal shootings by police in 2015, officers have fatally shot 247 women out of the more than 5,600 people killed overall."
+-   **Analysis summary**: We were able to get pretty close to the numbers quoted in the article. We came up with 248, one more than the Post included in their article. We aren't sure where the extra person is coming from, but we weren't able to locate them. The data doesn't include timing, so maybe the article came out before one from the same day got logged? That seems like a stretch though.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -81,8 +98,6 @@ women_fatal_police_shootings_2020 |>
 We're getting 1 more person than the Post did. Let's look at their original dataset to see if that makes a difference.
 
 ```{r}
-setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
-
 data_to_sept_2020_shootings <- read_csv("data/2020_sept_3_fatal-police_shootings_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
@@ -90,13 +105,13 @@ data_to_sept_2020_shootings <- read_csv("data/2020_sept_3_fatal-police_shootings
 data_to_sept_2020_shootings <- data_to_sept_2020_shootings |> 
   clean_names()
 
-women_fatal_police_shootings_sept_2020 <- data_to_sept_2020_shootings |>  
+data_to_sept_2020_women_shootings <- data_to_sept_2020_shootings |>  
   filter(gender == "F") 
 
-women_fatal_police_shootings_sept_2020 <- women_fatal_police_shootings_sept_2020 |>
+data_to_sept_2020_women_shootings <- data_to_sept_2020_women_shootings |>
   filter(date<"2020-09-04")
 
-women_fatal_police_shootings_sept_2020 |> 
+data_to_sept_2020_women_shootings |> 
   summarize(count = n())
 
 ```
@@ -105,8 +120,8 @@ It worked!
 
 ### Sentence 2
 
-* **Sentence text**: Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
-* **Analysis summary**: After a lot of struggling, we were able to figure out where the Post got its numbers from. The terms the Post used were quite vague (e.g. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. Below is our data analysis.
+-   **Sentence text**: Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
+-   **Analysis summary**: After a lot of struggling, we were able to figure out where the Post got some of its numbers from. The terms the Post used were quite vague (e.g. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. We were able to verify that 20 women were caught up in a situation like Crenshaw describes but were unable to confirm the Post's declaration that 12 women were "caught in crossfire or shot accidentally." Below is our data analysis.
 
 They're talking about Black women but mention 247 women - that's women of all races shot and killed by police. We can confirm that number. So let's assume they mean women of all races - even though the sentence implies Black women.
 
@@ -115,25 +130,27 @@ They're talking about Black women but mention 247 women - that's women of all ra
 
 # trying with v1 data to look at threat_level and see if we can get at women who were not the culprit
 
-women_fatal_police_shootings_sept_2020 |> group_by(threat_level) |>
+data_to_sept_2020_women_shootings |> 
+  group_by(threat_level) |>
   summarise(count = n())
 # Display results of code below this codeblock
 
 ```
 
-# So none of these get close to what we're looking for (20 or 12), nor do they mention anything about people not at fault. Let's try the v2 dataset:
+So none of these get close to what we're looking for (20 or 12), nor do they mention anything about people not at fault. Let's try the v2 dataset:
 
 ```{r}
-women_fatal_police_shootings_2020 |> group_by(threat_type) |>
+women_fatal_police_shootings_2020 |> 
+  group_by(threat_type) |>
   summarise(count = n())
 ```
 
-# Accident and flee add to 20. Those are probably our 20 magical women. We aren't entirely sure if this is what they did, but we don't know what else they could have done to get that number so that's what we're going to go with.
+Accident and flee add to 20. Those are probably our 20 magical women. We aren't entirely sure if this is what they did, but we don't know what else they could have done to get that number. Nowhere in the published dataset are there any specifications that reveal whether a woman was shot in crossfire - the (very unclear) values in the column are accident, attack, flee, move, point, shoot, threat, and undetermined - so we presume the Post compiled this data using police reports not made available to the public.
 
 ### Sentence 3
 
-* **Sentence text**: At least 89 of the women [fatally shot by police] were at their homes or residences where they sometimes stayed.
-* **Analysis summary**: We don't think this was determined through the dataset we have. There's no indicator of this info anywhere in either dataset. Presumably, the Post crawled through police reports that probably indicated whether the shooting was at the woman's house and from there got those statistics. We don't have access to those police reports, though, so we can only speculate; none of the Github data bares this out.
+-   **Sentence text**: At least 89 of the women [fatally shot by police] were at their homes or residences where they sometimes stayed.
+-   **Analysis summary**: We don't think this was determined through the dataset we have - there's no indicator of this info anywhere in either dataset. Presumably, the Post crawled through police reports that indicated whether the shooting was at the woman's house and got those statistics from there. We don't have access to those police reports, as the Post did not include any in the database, so we can only speculate. None of the Github data bares this out.
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -144,8 +161,8 @@ women_fatal_police_shootings_2020 |> group_by(threat_type) |>
 
 ### Sentence 4
 
-* **Sentence text**: About 31 percent, or 77, of the 247 women fatally shot by police since 2015 had mental health issues, compared to 22 percent of the 5,362 men killed.
-* **Analysis summary**: We were able to confirm the findings using the original dataset Joel and Shaun found that reflects what info they had when the article came out. That means we should probably use this dataset going forward, though it's strange that we got to the 20 answer thanks to the V2 dataset. Maybe the Post was already testing V2 at the time?
+-   **Sentence text**: About 31 percent, or 77, of the 247 women fatally shot by police since 2015 had mental health issues, compared to 22 percent of the 5,362 men killed.
+-   **Analysis summary**: We were able to confirm the findings using the V1 dataset. We wondered whether we should use only that dataset moving forward since the Post - to our knowlege - only used this database in reporting our 2020 story. We didn't end up doing this because, strangely, we could only verify the 20 number thanks to the V2 dataset. Maybe the Post was already testing V2 at the time?
 
 ```{r}
 # Put code to reverse engineer sentence here
@@ -155,16 +172,15 @@ data_to_sept_2020_shootings |>
 # Display results of code below this codeblock
 ```
 
-This is looking more accurate. 77 out of 247 women and 22% of men had signs of mental illness.
-### Sentence 5
+This is looking more accurate. 77 out of 247 women and 22% of men had signs of mental illness. \### Sentence 5
 
-* **Sentence text**: Since 2015, police have killed 26 unarmed women, including Taylor.
-* **Analysis summary**: This was the easiest finding to confirm. A simple column analysis reveals that 26 unarmed women were killed up until the date of publication.
+-   **Sentence text**: Since 2015, police have killed 26 unarmed women, including Taylor.
+-   **Analysis summary**: This was the easiest finding to confirm. A simple column analysis reveals that 26 unarmed women were killed up until the date of publication.
 
 ```{r}
 # Put code to reverse engineer sentence here
 ## using v1 data
-women_fatal_police_shootings_sept_2020 |> 
+data_to_sept_2020_women_shootings |> 
   group_by(armed) |> 
   summarize(count=n())
 
