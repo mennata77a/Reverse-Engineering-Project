@@ -35,28 +35,27 @@ library(dplyr)
 
 In this section, describe the source of the data, write a basic data dictionary for data you are working with, and discuss any caveats or issues you discovered working with this data. 
 
-Our data comes from a database the Washington Post compiled with police shootings of citizens. It's unclear where exactly the Post gets its data from - presumably, skimming press releases from police departments. The biggest obstacle to us was the development of a new database version, V2. We were unable to verify some of the Post's numbers until we switched from V2 data (much more specific) to V1 data - and conversely were unable to verify some data with the V1 databse until we switched to V2 data.
+Our data comes from a database the Washington Post compiled 
 
 ```{r echo=FALSE, message=FALSE}
 # This code sets the working directory to my local one (Taylor) - it will mess up your code, so erase this section and make sure yours is set to the correct working directory
 setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
 
-# Load required data, should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
+# Load required data
 fatal_police_shootings <- read_csv("data/fatal-police-shootings-data.csv")
+
+# Path to data should be loaded from folder "data" i.e. read_csv("data/name_of_data.csv")
 
 # Clean required data and prepare for analysis if needed. 
 clean_fatal_police_shootings <- fatal_police_shootings |> 
   clean_names()
 
-# Filter for women.
 women_fatal_police_shootings <- clean_fatal_police_shootings |>  
   filter(gender == "female") 
 
-# Make the data column usable for analysis.
 clean_fatal_police_shootings <- clean_fatal_police_shootings |> mutate(date=mdy(date))
 women_fatal_police_shootings <- women_fatal_police_shootings |> mutate(date=mdy(date))
 
-# Adjust the data frame so it reflects the database as it was when the Post published its story.
 clean_fatal_police_shootings_2020 <- clean_fatal_police_shootings |>  
   filter(date<"2020-09-04")
 ```
@@ -67,25 +66,29 @@ In this notebook, we are reverse engineering five sentences from the story.
 ### Sentence 1
 
 * **Sentence text**: "Since The Washington Post began tracking fatal shootings by police in 2015, officers have fatally shot 247 women out of the more than 5,600 people killed overall."
-* **Analysis summary**: We were able to get pretty close to the numbers quoted in the article. We came up with 248, one more than the Post included in their article. We weren't sure where the extra person was coming from - maybe police shot someone the same day as the Post published its article?
+* **Analysis summary**: We were able to get pretty close to the numbers quoted in the article. We came up with 248, one more than the Post included in their article. We aren't sure where the extra person is coming from, but we weren't able to locate them. The data doesn't include timing, so maybe the article came out before one from the same day got logged? That seems like a stretch though.
 
 ```{r}
-# Reverse engineering sentence 1 to filter shootings after publication out.
+# Put code to reverse engineer sentence here
 women_fatal_police_shootings_2020 <- women_fatal_police_shootings |>
-  filter(date<"2020-09-04") |> 
+  filter(date<"2020-09-04")
+
+women_fatal_police_shootings_2020 |> 
   summarize(count = n())
 
-# Results
+# Display results of code below this codeblock
+
 ```
 
-We're getting 1 more person than the Post did. Let's look at its original dataset to see if that makes a difference.
+We're getting 1 more person than the Post did. Let's look at their original dataset to see if that makes a difference.
 
 ```{r}
 setwd("~/data_journalism/data_journalism_fall_2023/major_assignments/reverse_engineering/Reverse-Engineering-Project/data")
 
 data_to_sept_2020_shootings <- read_csv("data/2020_sept_3_fatal-police_shootings_data.csv")
 
-# Clean required data and prepare for analysis. 
+# Clean required data and prepare for analysis if needed. 
+
 data_to_sept_2020_shootings <- data_to_sept_2020_shootings |> 
   clean_names()
 
@@ -93,12 +96,14 @@ women_fatal_police_shootings_sept_2020 <- data_to_sept_2020_shootings |>
   filter(gender == "F") 
 
 women_fatal_police_shootings_sept_2020 <- women_fatal_police_shootings_sept_2020 |>
-  filter(date<"2020-09-04") |> 
+  filter(date<"2020-09-04")
+
+women_fatal_police_shootings_sept_2020 |> 
   summarize(count = n())
 
 ```
 
-It worked! We were able to verify the number the Post used in the article.
+It worked!
 
 ### Sentence 2
 
