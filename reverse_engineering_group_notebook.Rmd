@@ -105,20 +105,22 @@ It worked! We were able to verify the number the Post used in the article.
 * **Sentence text**: Twenty of the 247 women were killed in that kind of situation, analysis shows. In 12 of those 20 shootings, police said the women killed were caught in crossfire or shot accidentally.
 * **Analysis summary**: After a lot of struggling, we were able to figure out where the Post got its numbers from. The terms the Post used were quite vague (e.g. giving data about all women - 247 - while quoting Crenshaw about Black women). Not to be daunted, we tried every possibility we could think of to try to get matching numbers, including using the old dataset. Below is our data analysis.
 
-The Post talks about Black women in the sentence but mentions 247 women. That number, we found, is the number  all women (of all races shot) and killed by police. Given that, we assumed the journalists meant women of all races.
+They're talking about Black women but mention 247 women - that's women of all races shot and killed by police. We can confirm that number. So let's assume they mean women of all races - even though the sentence implies Black women.
 
 ```{r}
-# Use V1 data to examine the threat_level variable in order to verify the Post's number for women that weren't suspects killed.
+# Put code to reverse engineer sentence here
+
+# trying with v1 data to look at threat_level and see if we can get at women who were not the culprit
 
 women_fatal_police_shootings_sept_2020 |> group_by(threat_level) |>
   summarise(count = n())
+# Display results of code below this codeblock
 
-# Results
 ```
 
-```{r}
-# So none of these get close to the numbers we're looking for (20 or 12), nor do they mention anything about people not at fault. Let's try the v2 dataset:
+# So none of these get close to what we're looking for (20 or 12), nor do they mention anything about people not at fault. Let's try the v2 dataset:
 
+```{r}
 women_fatal_police_shootings_2020 |> group_by(threat_type) |>
   summarise(count = n())
 ```
